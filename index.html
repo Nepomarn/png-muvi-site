@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PNG Movie Drops 🎬</title>
+  <title>NetPg Muvi 🎬</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,19 +21,14 @@
       margin: 0;
       font-size: 24px;
     }
-    .telegram-link {
-      display: block;
-      margin-top: 10px;
-      color: #00acee;
-      text-decoration: none;
-    }
-    .controls {
+    .search-bar {
       text-align: center;
       padding: 15px;
     }
-    .controls input, .controls select {
+    .search-bar input {
       padding: 10px;
-      margin: 5px;
+      width: 80%;
+      max-width: 400px;
       border-radius: 5px;
       border: none;
       font-size: 16px;
@@ -79,62 +74,97 @@
 </head>
 <body>
   <header>
-    <h1>🎥 PNG Movie Drops</h1>
-    <a class="telegram-link" href="https://t.me/NetPgMoviez" target="_blank">Join our Telegram Channel</a>
+    <h1>🎥 NetPg Muvi</h1>
+    <p>Click any poster to open the Telegram post</p>
   </header>
 
-  <div class="controls">
+  <div class="search-bar">
     <input type="text" id="searchInput" placeholder="🔍 Search movies..." />
-    <select id="genreSelect">
-      <option value="">All Genres</option>
-    </select>
   </div>
 
   <section class="movie-grid" id="movieGrid"></section>
 
   <footer>
-    <p>&copy; 2025 PNG Movie Drops. Powered by <a href="https://t.me/NetPgMoviez" style="color:#00acee;">@NetPgMoviez</a></p>
+    <p>&copy; 2025 NetPg Muvi. Powered by <a href="https://t.me/NetPgMoviez" style="color:#00acee;">@NetPgMoviez</a></p>
   </footer>
 
   <script>
-    const apiKey = "77895da1c0b0f4a7a42da492eeb18444";
+    const movies = [
+      { title: "A Dickens Of A Christmas", id: "16543" },
+      { title: "Against All Odds", id: "16737" },
+      { title: "Grow", id: "16739" },
+      { title: "Dead to Rights", id: "16740" },
+      { title: "Grounded in Love", id: "16748" },
+      { title: "Frankenstein", id: "16751" },
+      { title: "Borley Rectory The Awakening", id: "16750" },
+      { title: "Lee Soo Man King of K-Pop", id: "16804" },
+      { title: "Baramulla", id: "16813" },
+      { title: "Good Fortune", id: "16815" },
+      { title: "Fan of Mine", id: "16816" },
+      { title: "Wicked One Wonderful Night", id: "16817" },
+      { title: "Traction Park Massacre", id: "16818" },
+      { title: "Terror Tales Poetry Death Vol 1", id: "16822" },
+      { title: "Maybelline Prince", id: "16823" },
+      { title: "Christmas of Giving", id: "16829" },
+      { title: "Thieves Highway", id: "16831" },
+      { title: "Omniscient Reader The Prophecy", id: "14668" },
+      { title: "Exit Protocol", id: "16880" },
+      { title: "The Spirit of Christmas Station", id: "16927" },
+      { title: "Megadoc", id: "16928" },
+      { title: "Christmas Above the Clouds", id: "16932" },
+      { title: "Stone Cold Fox", id: "16933" },
+      { title: "Terry McMillan Presents Preach Pray Love", id: "16936" },
+      { title: "Nazi Zombies", id: "16983" },
+      { title: "A Keller Christmas Vacation", id: "16984" },
+      { title: "Snatchers", id: "16991" },
+      { title: "Trapped in Her Dorm Room", id: "16992" },
+      { title: "Worldbreaker", id: "16995" },
+      { title: "Saving the Christmas Ranch", id: "16996" },
+      { title: "Deathstalker", id: "16994" },
+      { title: "Roofman", id: "17002" },
+      { title: "The Last 600 Meters", id: "17007" },
+      { title: "Kiss of the Spider Woman", id: "17008" },
+      { title: "Soul on Fire", id: "17016" },
+      { title: "A Woman Scorned", id: "17018" },
+      { title: "12 Toys of Christmas", id: "17019" },
+      { title: "Plight", id: "17020" },
+      { title: "Queens of the Dead", id: "17023" },
+      { title: "Being Eddie", id: "17046" },
+      { title: "Life After", id: "17048" },
+      { title: "A Merry Little Ex-Mas", id: "17049" },
+      { title: "Playdate", id: "17050" },
+      { title: "Operation Friendship", id: "17129" },
+      { title: "A Garden Cartoon Movie The Greatest Thing Ever", id: "17131" },
+      { title: "Bearing Witness Native American Voices in Hollywood", id: "17133" },
+      { title: "Shark Terror", id: "17134" },
+      { title: "Potluck Teacher", id: "17137" },
+      { title: "Book of Joshua Walls of Jericho", id: "17141" },
+      { title: "A Season for Love", id: "17150" },
+      { title: "Louis Theroux The Settlers", id: "17153" },
+      { title: "Strike of Love", id: "17158" },
+      { title: "Horse Healing", id: "17160" },
+      { title: "The Final Play", id: "17163" },
+      { title: "One Battle After Another", id: "17243" },
+      { title: "Raptus", id: "17242" }
+    ];
+
     const movieGrid = document.getElementById("movieGrid");
     const searchInput = document.getElementById("searchInput");
-    const genreSelect = document.getElementById("genreSelect");
-    let genres = {};
 
-    async function loadGenres() {
-      const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=en-US`);
-      const data = await res.json();
-      data.genres.forEach(g => {
-        genres[g.id] = g.name;
-        const option = document.createElement("option");
-        option.value = g.id;
-        option.textContent = g.name;
-        genreSelect.appendChild(option);
-      });
-    }
-
-    async function fetchMovies(query = "", genreId = "") {
-      let url = query
-        ? `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}`
-        : `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}`;
-
-      const res = await fetch(url);
-      const data = await res.json();
-      displayMovies(data.results);
-    }
-
-    function displayMovies(movies) {
+    function displayMovies(list) {
       movieGrid.innerHTML = "";
-      movies.slice(0, 8).forEach(movie => {
+      list.forEach(movie => {
+        const poster = "https://via.placeholder.com/300x450?text=" + encodeURIComponent(movie.title);
+        const telegramLink = `https://t.me/NetPgMoviez/${movie.id}`;
         const card = document.createElement("div");
         card.className = "movie-card";
         card.innerHTML = `
-          <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title} Poster" />
+          <a href="${telegramLink}" target="_blank">
+            <img src="${poster}" alt="${movie.title} Poster" />
+          </a>
           <div class="info">
-            <h3>${movie.title} (${movie.release_date?.slice(0, 4) || "N/A"})</h3>
-            <a class="download-btn" href="https://t.me/NetPgMoviez" target="_blank">Download Now</a>
+            <h3>${movie.title} (2025)</h3>
+            <a class="download-btn" href="${telegramLink}" target="_blank">Download Now</a>
           </div>
         `;
         movieGrid.appendChild(card);
@@ -142,17 +172,12 @@
     }
 
     searchInput.addEventListener("keyup", () => {
-      const query = searchInput.value.trim();
-      fetchMovies(query);
+      const query = searchInput.value.toLowerCase();
+      const filtered = movies.filter(m => m.title.toLowerCase().includes(query));
+      displayMovies(filtered);
     });
 
-    genreSelect.addEventListener("change", () => {
-      const genreId = genreSelect.value;
-      fetchMovies("", genreId);
-    });
-
-    loadGenres();
-    fetchMovies();
+    displayMovies(movies);
   </script>
 </body>
 </html>
