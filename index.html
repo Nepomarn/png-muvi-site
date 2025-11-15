@@ -27,6 +27,17 @@
       color: #00acee;
       text-decoration: none;
     }
+    .controls {
+      text-align: center;
+      padding: 15px;
+    }
+    .controls input, .controls select {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+    }
     .movie-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -57,6 +68,13 @@
       text-decoration: none;
       border-radius: 4px;
     }
+    footer {
+      background: #222;
+      color: #aaa;
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -65,22 +83,76 @@
     <a class="telegram-link" href="https://t.me/NetPgMoviez" target="_blank">Join our Telegram Channel</a>
   </header>
 
-  <section class="movie-grid">
-    <div class="movie-card">
-      <img src="https://via.placeholder.com/300x450?text=Fast+X" alt="Fast X Poster" />
-      <div class="info">
-        <h3>Fast X (2023)</h3>
-        <a class="download-btn" href="https://t.me/NetPgMoviez" target="_blank">Download Now</a>
-      </div>
-    </div>
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="🔍 Search movies..." />
+    <select id="genreSelect">
+      <option value="">All Genres</option>
+    </select>
+  </div>
 
-    <div class="movie-card">
-      <img src="https://via.placeholder.com/300x450?text=Avatar+2" alt="Avatar 2 Poster" />
-      <div class="info">
-        <h3>Avatar 2 (2022)</h3>
-        <a class="download-btn" https://t.me/NetPgMoviez" target="_blank">Download Now</a>
-      </div>
-    </div>
-  </section>
+  <section class="movie-grid" id="movieGrid"></section>
+
+  <footer>
+    <p>&copy; 2025 PNG Movie Drops. Powered by <a href="https://t.me/NetPgMoviez" style="color:#00acee;">@NetPgMoviez</a></p>
+  </footer>
+
+  <script>
+    const apiKey = "77895da1c0b0f4a7a42da492eeb18444";
+    const movieGrid = document.getElementById("movieGrid");
+    const searchInput = document.getElementById("searchInput");
+    const genreSelect = document.getElementById("genreSelect");
+    let genres = {};
+
+    async function loadGenres() {
+      const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=en-US`);
+      const data = await res.json();
+      data.genres.forEach(g => {
+        genres[g.id] = g.name;
+        const option = document.createElement("option");
+        option.value = g.id;
+        option.textContent = g.name;
+        genreSelect.appendChild(option);
+      });
+    }
+
+    async function fetchMovies(query = "", genreId = "") {
+      let url = query
+        ? `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}`
+        : `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreId}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      displayMovies(data.results);
+    }
+
+    function displayMovies(movies) {
+      movieGrid.innerHTML = "";
+      movies.slice(0, 8).forEach(movie => {
+        const card = document.createElement("div");
+        card.className = "movie-card";
+        card.innerHTML = `
+          <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title} Poster" />
+          <div class="info">
+            <h3>${movie.title} (${movie.release_date?.slice(0, 4) || "N/A"})</h3>
+            <a class="download-btn" href="https://t.me/NetPgMoviez" target="_blank">Download Now</a>
+          </div>
+        `;
+        movieGrid.appendChild(card);
+      });
+    }
+
+    searchInput.addEventListener("keyup", () => {
+      const query = searchInput.value.trim();
+      fetchMovies(query);
+    });
+
+    genreSelect.addEventListener("change", () => {
+      const genreId = genreSelect.value;
+      fetchMovies("", genreId);
+    });
+
+    loadGenres();
+    fetchMovies();
+  </script>
 </body>
 </html>
